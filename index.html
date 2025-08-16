@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Next.js & Express.js Task Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header Component -->
+    <header class="header">
+        <div class="container">
+            <div class="header__content">
+                <div class="header__brand">
+                    <h1 class="header__title">TaskFlow</h1>
+                    <span class="header__subtitle">Next.js & Express.js Demo</span>
+                </div>
+                <div class="header__actions">
+                    <button class="btn btn--outline btn--sm" id="themeToggle">
+                        <span id="themeIcon">🌙</span>
+                    </button>
+                    <button class="btn btn--primary btn--sm" id="exportBtn">
+                        Export Tasks
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Dashboard Stats -->
+            <section class="dashboard-stats">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card__icon">📋</div>
+                        <div class="stat-card__content">
+                            <div class="stat-card__value" id="totalTasks">0</div>
+                            <div class="stat-card__label">Total Tasks</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card__icon">⏳</div>
+                        <div class="stat-card__content">
+                            <div class="stat-card__value" id="pendingTasks">0</div>
+                            <div class="stat-card__label">Pending</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card__icon">🔄</div>
+                        <div class="stat-card__content">
+                            <div class="stat-card__value" id="inProgressTasks">0</div>
+                            <div class="stat-card__label">In Progress</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card__icon">✅</div>
+                        <div class="stat-card__content">
+                            <div class="stat-card__value" id="completedTasks">0</div>
+                            <div class="stat-card__label">Completed</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Task Controls -->
+            <section class="task-controls">
+                <div class="controls-row">
+                    <button class="btn btn--primary" id="addTaskBtn">
+                        + Add Task
+                    </button>
+                    <div class="controls-group">
+                        <input 
+                            type="text" 
+                            class="form-control search-input" 
+                            id="searchInput" 
+                            placeholder="Search tasks..."
+                        >
+                        <select class="form-control" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <select class="form-control" id="priorityFilter">
+                            <option value="">All Priority</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                        <select class="form-control" id="sortBy">
+                            <option value="createdAt">Sort by Created</option>
+                            <option value="dueDate">Sort by Due Date</option>
+                            <option value="priority">Sort by Priority</option>
+                            <option value="title">Sort by Title</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Task List -->
+            <section class="task-list-section">
+                <div class="task-list" id="taskList">
+                    <div class="loading-state" id="loadingState">
+                        <div class="loading-spinner"></div>
+                        <p>Loading tasks...</p>
+                    </div>
+                    <div class="empty-state hidden" id="emptyState">
+                        <div class="empty-state__icon">📝</div>
+                        <h3>No tasks found</h3>
+                        <p>Create your first task to get started!</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Task Form Modal -->
+    <div class="modal hidden" id="taskModal">
+        <div class="modal__backdrop"></div>
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 id="modalTitle">Add New Task</h3>
+                <button class="modal__close" id="closeModal">&times;</button>
+            </div>
+            <form id="taskForm" class="modal__body">
+                <div class="form-group">
+                    <label class="form-label" for="taskTitle">Title</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        id="taskTitle" 
+                        required
+                        maxlength="100"
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="taskDescription">Description</label>
+                    <textarea 
+                        class="form-control" 
+                        id="taskDescription" 
+                        rows="3"
+                        maxlength="500"
+                    ></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="taskPriority">Priority</label>
+                        <select class="form-control" id="taskPriority" required>
+                            <option value="">Select Priority</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="taskDueDate">Due Date</label>
+                        <input 
+                            type="date" 
+                            class="form-control" 
+                            id="taskDueDate" 
+                            required
+                        >
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="taskStatus">Status</label>
+                    <select class="form-control" id="taskStatus" required>
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+            </form>
+            <div class="modal__footer">
+                <button type="button" class="btn btn--outline" id="cancelBtn">Cancel</button>
+                <button type="submit" form="taskForm" class="btn btn--primary" id="saveTaskBtn">
+                    Save Task
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal hidden" id="confirmModal">
+        <div class="modal__backdrop"></div>
+        <div class="modal__content modal__content--sm">
+            <div class="modal__header">
+                <h3>Confirm Action</h3>
+                <button class="modal__close" id="closeConfirmModal">&times;</button>
+            </div>
+            <div class="modal__body">
+                <p id="confirmMessage">Are you sure you want to perform this action?</p>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn--outline" id="cancelConfirmBtn">Cancel</button>
+                <button type="button" class="btn btn--primary" id="confirmActionBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
